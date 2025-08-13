@@ -33,7 +33,7 @@
                                 <a class="nav-link active" href="/home">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/products">Products</a>
+                                <a class="nav-link" href="/product">Product</a>
                             </li>
                         </ul>
                         <form class="d-flex w-auto" role="search">
@@ -58,7 +58,7 @@
                                     <a class="nav-link active" href="/home">Home</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/products">Products</a>
+                                    <a class="nav-link" href="/product">Product</a>
                                 </li>
                             </ul>
                             <form class="d-flex mt-3" role="search">
@@ -120,7 +120,11 @@
             delimiters: ['[', ']'],
             computed: {
                 cart_list() {
-                    return JSON.parse(localStorage.getItem("cart_list") || "[]");
+                    const cart = JSON.parse(localStorage.getItem("cart_list") || "[]");
+                    return cart.map(item => ({
+                        ...item,
+                        price: parseFloat(item.price)
+                    }));
                 }
             },
 

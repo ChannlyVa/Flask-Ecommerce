@@ -17,7 +17,7 @@ def home():
     success_param = request.args.get('success', False)
     return render_template("front/pages/home.html", products=datas, success=success_param)
 
-@app.route('/products')
+@app.route('/product')
 def product():
     return render_template('front/pages/product.html', products=datas)
 
@@ -28,10 +28,6 @@ def cart():
 @app.route('/checkout')
 def checkOut():
     return render_template('front/pages/checkout.html')
-
-@app.route('/vue')
-def vue():
-    return render_template('front/pages/vue.html')
 
 @app.route('/order', methods=['POST'])
 def order():
@@ -79,6 +75,14 @@ def order():
 
     return redirect('/home?success=true')
 
+@app.route('/productDetail/<int:product_id>')
+def productDetail(product_id):
+    product_detail = next((item for item in datas if item['id'] == product_id), None)
+    if product_detail:
+        return render_template('front/pages/productDetail.html', product=product_detail)
+    else:
+        # Handle case where product is not found, e.g., redirect to a 404 page or product list
+        return "Product not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True)

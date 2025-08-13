@@ -3,7 +3,7 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-<div class="container w-100 mt-3 mb-5 p-0">
+<div class="container w-100 mt-3 mb-5 p-0" id="app">
     <h2 class="text-center mb-4">Product List</h2>
 
     <table class="table table-bordered align-middle text-center">
@@ -23,34 +23,36 @@
                     <td>
                         <img style="width: 50px;height: 50px;" :src="product.image" alt="">
                     </td>
-                    <td class="text-start">[product.title]</td>
+                    <td class="text-start">[ product.title ]</td>
                     <td>
                         <div class="btn-group" role="group">
                             <button type="button" class="btn btn-outline-danger" @click="decreaseQty(index)">-</button>
-                            <button type="button" class="btn px-4">[product.qty]</button>
+                            <button type="button" class="btn px-4">[ product.qty ]</button>
                             <button type="button" class="btn btn-outline-primary" @click="increaseQty(index)">+</button>
                         </div>
                     </td>
-                    <td>$[product.price.toFixed(2)]</td>
-                    <td class="total-price">$[(product.price * product.qty).toFixed(2)]</td>
-                    <td><button class="btn btn-sm btn-danger" @click="Delete(index)">Delete</button></td>
+                    <td>$[ product.price.toFixed(2) ]</td>
+                    <td class="total-price">$[ (product.price * product.qty).toFixed(2) ]</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @click="Delete(index)">Delete</button>
+                    </td>
                 </tr>
             </template>
             <tr v-else>
-                <td colspan="5" class="text-center">Your cart is empty.</td>
+                <td colspan="6" class="text-center">Your cart is empty.</td>
             </tr>
         </tbody>
-        <tfoot>
+        <tfoot v-if="cart_list.length > 0">
             <tr class="table-secondary">
                 <td colspan="5" class="text-end"><strong>Grand Total</strong></td>
-                <td><strong>$[grandTotal.toFixed(2)]</strong></td>
+                <td><strong>$[ grandTotal.toFixed(2) ]</strong></td>
             </tr>
         </tfoot>
     </table>
 
     <div class="w-full d-flex justify-content-end align-items-center gap-3">
         <a href="/home" class="btn btn-sm btn-secondary">Back</a>
-        <a href="/checkout" class="btn btn-sm btn-primary">Checkout</a>
+        <a href="/checkout" class="btn btn-sm btn-primary" v-if="cart_list.length > 0">Checkout</a>
     </div>
 </div>
 {% endblock %}
@@ -63,7 +65,10 @@
         delimiters: ['[', ']'],
         data() {
             return {
-                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]"),
+                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]").map(item => ({
+                    ...item,
+                    price: parseFloat(item.price)
+                })),
             };
         },
         computed: {
@@ -87,7 +92,7 @@
             Delete(index) {
                 Swal.fire({
                     title: 'Are you sure?',
-                    text: 'This user will be deleted.',
+                    text: `"${this.cart_list[index].title}" will be removed from your cart.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
@@ -97,7 +102,6 @@
                     if (result.isConfirmed) {
                         this.cart_list.splice(index, 1);
                         this.updateCart();
-                        this.clear();
                         Swal.fire('Deleted!', 'Product has been removed.', 'success');
                     }
                 });

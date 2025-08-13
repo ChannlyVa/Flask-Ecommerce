@@ -5,6 +5,7 @@
 {% block content %}
 <div class="container w-100 mt-3 mb-5 p-0">
     <!-- Product Grid -->
+
     <div class="container w-100 mt-3 px-4 py-3 bg-white">
         <h1>Our Products</h1>
         <div class="product-grid">
@@ -15,7 +16,12 @@
                     <h3 class="product-title">{{ product.title }}</h3>
                     <p class="product-category text-muted">{{ product.category }}</p>
                     <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
-                    <button class="add-to-cart" @click="addToCart({{product}})">Add to cart</button>
+                </div>
+                <div class=" mb-2">
+                    <a href="/productDetail/{{product.id}}"
+                        class=" btn btn-sm btn-outline-secondary w-100 mb-2">View</a>
+                    <button class=" btn btn-sm btn-outline-primary w-100" @click="addToCart({{product}})">Add to
+                        cart</button>
                 </div>
             </div>
             {% endfor %}
@@ -49,6 +55,7 @@
                     Swal.fire('Added!', 'Product has been added to cart.', 'success');
                 } else {
                     product.qty = 1;
+                    product.price = parseFloat(product.price); // Ensure price is a number
                     this.cart_list.push(product);
                     Swal.fire('Added!', 'Product has been added to cart.', 'success');
                 }

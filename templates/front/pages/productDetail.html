@@ -1,0 +1,82 @@
+<!-- METHOD 1: Using HTML Data Attributes (Recommended) -->
+{% extends "front/layouts/master.html" %}
+
+{% block title %}Product Detail{% endblock %}
+
+{% block content %}
+<div class="container my-5" id="produciDetail" data-product-id="{{ product.id }}"
+    data-product-title="{{ product.title }}" data-product-price="{{ product.price }}"
+    data-product-description="{{ product.description }}" data-product-image="{{ product.image }}">
+
+    <div class="row align-items-center g-5">
+        <!-- Product Image -->
+        <div class="col-md-6 text-center">
+            <img :src="product.image" class="img-fluid rounded shadow-sm border" :alt="product.title"
+                style="max-height: 400px; object-fit: contain;">
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-md-6">
+            <h1 class="fw-bold mb-3 text-start">[product.title]</h1>
+            <h4 class="text-primary fw-semibold mb-3">$[product.price]</h4>
+            <p class="text-muted mb-4">[product.description]</p>
+
+            <!-- Buttons -->
+            <div class="d-flex gap-3">
+                <a href="/product" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <button class="btn btn-primary px-4" @click="addToCart(product)">
+                    <i class="bi bi-cart-plus"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customScript %}
+<script>
+    // METHOD 1: Read from data attributes
+    const appElement = document.getElementById('produciDetail');
+    const productData = {
+        id: parseInt(appElement.dataset.productId),
+        title: appElement.dataset.productTitle,
+        price: parseFloat(appElement.dataset.productPrice),
+        description: appElement.dataset.productDescription,
+        image: appElement.dataset.productImage
+    };
+
+    const {createApp} = Vue;
+
+    createApp({
+        delimiters: ['[', ']'],
+        data() {
+            return {
+                product: productData,
+                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]")
+            }
+        },
+        methods: {
+            addToCart(product) {
+
+                let currentCart = JSON.parse(localStorage.getItem("cart_list") || "[]");
+                let index = currentCart.findIndex(item => item.id === product.id);
+
+                if (index !== -1) {
+                    currentCart[index].qty++;
+                    this.cart_list = currentCart;
+                    Swal.fire('Updated!', 'Product quantity has been updated in cart.', 'success');
+                } else {
+                    const cartItem = {...product, qty: 1};
+                    currentCart.push(cartItem);
+                    this.cart_list = currentCart;
+                    Swal.fire('Added!', 'Product has been added to cart.', 'success');
+                }
+
+                localStorage.setItem('cart_list', JSON.stringify(currentCart));
+            }
+        }
+    }).mount('#app');
+</script>
+{% endblock %}
