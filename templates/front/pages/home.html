@@ -1,0 +1,111 @@
+{% extends "front/layouts/master.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div id="app" class="container w-100 mt-3 mb-5 p-0">
+    {% if success %}
+    <script>
+        Swal.fire('Ordered!', 'Your order has been successfully.', 'success');
+        localStorage.removeItem("cart_list");
+        window.history.replaceState({}, document.title, window.location.pathname);
+    </script>
+    {% endif %}
+    <!-- Carousel -->
+    <div id="carouselExampleIndicators" class="carousel slide">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+                aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{{ url_for('static', filename='images/s1.jpg') }}" class="d-block w-100 slide-image"
+                    alt="Slide 1">
+            </div>
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='images/s2.jpg') }}" class="d-block w-100 slide-image"
+                    alt="Slide 2">
+            </div>
+            <div class="carousel-item">
+                <img src="{{ url_for('static', filename='images/s3.jpg') }}" class="d-block w-100 slide-image"
+                    alt="Slide 3">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+            data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="container w-100 mt-3 px-4 py-3 bg-white">
+        <h1>Our Products</h1>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
+                <div class="product-details">
+                    <h3 class="product-title">{{ product.title }}</h3>
+                    <p class="product-category text-muted">{{ product.category }}</p>
+                    <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                    <button class="add-to-cart" @click="addToCart({{product}})">Add to Cart</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customScript %}
+<script>
+    const {createApp} = Vue;
+
+    createApp({
+        delimiters: ['[', ']'],
+        data() {
+            return {
+                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]"),
+            };
+        },
+
+        methods: {
+
+            addToCart(product) {
+                console.log('Hello');
+
+                let index = this.cart_list.findIndex(item => item.title === product.title);
+
+
+                if (index !== -1) {
+                    this.cart_list[index].qty++;
+                    Swal.fire('Added!', 'Product has been added to cart.', 'success');
+                } else {
+                    product.qty = 1;
+                    this.cart_list.push(product);
+                    Swal.fire('Added!', 'Product has been added to cart.', 'success');
+                }
+
+                localStorage.setItem('cart_list', JSON.stringify(this.cart_list));
+
+            },
+
+            removeFromCart(product) {
+                this.cart_list = this.cart_list.filter(item => item.title !== product.title);
+                localStorage.setItem('cart_list', JSON.stringify(this.cart_list));
+                Swal.fire('Removed!', 'Product has been removed from cart.', 'success');
+            }
+        }
+    }).mount('#app');
+</script>
+{% endblock %}

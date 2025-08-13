@@ -1,0 +1,68 @@
+{% extends "front/layouts/master.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container w-100 mt-3 mb-5 p-0">
+    <!-- Product Grid -->
+    <div class="container w-100 mt-3 px-4 py-3 bg-white">
+        <h1>Our Products</h1>
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.image }}" alt="{{ product.title }}" class="product-image">
+                <div class="product-details">
+                    <h3 class="product-title">{{ product.title }}</h3>
+                    <p class="product-category text-muted">{{ product.category }}</p>
+                    <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                    <button class="add-to-cart" @click="addToCart({{product}})">Add to cart</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block customScript %}
+<script>
+    const {createApp} = Vue;
+
+    createApp({
+        delimiters: ['[', ']'],
+        data() {
+            return {
+                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]"),
+            };
+        },
+
+        methods: {
+
+            addToCart(product) {
+                console.log('Hello');
+
+                let index = this.cart_list.findIndex(item => item.title === product.title);
+
+
+                if (index !== -1) {
+                    this.cart_list[index].qty++;
+                    Swal.fire('Added!', 'Product has been added to cart.', 'success');
+                } else {
+                    product.qty = 1;
+                    this.cart_list.push(product);
+                    Swal.fire('Added!', 'Product has been added to cart.', 'success');
+                }
+
+                localStorage.setItem('cart_list', JSON.stringify(this.cart_list));
+
+            },
+
+            removeFromCart(product) {
+                this.cart_list = this.cart_list.filter(item => item.title !== product.title);
+                localStorage.setItem('cart_list', JSON.stringify(this.cart_list));
+                Swal.fire('Removed!', 'Product has been removed from cart.', 'success');
+            }
+        }
+    }).mount('#app');
+</script>
+{% endblock %}

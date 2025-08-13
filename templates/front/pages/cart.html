@@ -1,0 +1,111 @@
+{% extends "front/layouts/master.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container w-100 mt-3 mb-5 p-0">
+    <h2 class="text-center mb-4">Product List</h2>
+
+    <table class="table table-bordered align-middle text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Photo</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template v-if="cart_list.length > 0">
+                <tr v-for="(product, index) in cart_list" :key="index">
+                    <td>
+                        <img style="width: 50px;height: 50px;" :src="product.image" alt="">
+                    </td>
+                    <td class="text-start">[product.title]</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-danger" @click="decreaseQty(index)">-</button>
+                            <button type="button" class="btn px-4">[product.qty]</button>
+                            <button type="button" class="btn btn-outline-primary" @click="increaseQty(index)">+</button>
+                        </div>
+                    </td>
+                    <td>$[product.price.toFixed(2)]</td>
+                    <td class="total-price">$[(product.price * product.qty).toFixed(2)]</td>
+                    <td><button class="btn btn-sm btn-danger" @click="Delete(index)">Delete</button></td>
+                </tr>
+            </template>
+            <tr v-else>
+                <td colspan="5" class="text-center">Your cart is empty.</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr class="table-secondary">
+                <td colspan="5" class="text-end"><strong>Grand Total</strong></td>
+                <td><strong>$[grandTotal.toFixed(2)]</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="w-full d-flex justify-content-end align-items-center gap-3">
+        <a href="/home" class="btn btn-sm btn-secondary">Back</a>
+        <a href="/checkout" class="btn btn-sm btn-primary">Checkout</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block customScript %}
+<script>
+    const {createApp} = Vue;
+
+    createApp({
+        delimiters: ['[', ']'],
+        data() {
+            return {
+                cart_list: JSON.parse(localStorage.getItem("cart_list") || "[]"),
+            };
+        },
+        computed: {
+            grandTotal() {
+                return this.cart_list.reduce((sum, product) => sum + (product.price * product.qty), 0);
+            }
+        },
+        methods: {
+            increaseQty(index) {
+                this.cart_list[index].qty++;
+                this.updateCart();
+            },
+            decreaseQty(index) {
+                if (this.cart_list[index].qty > 1) {
+                    this.cart_list[index].qty--;
+                } else {
+                    this.cart_list.splice(index, 1);
+                }
+                this.updateCart();
+            },
+            Delete(index) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This user will be deleted.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.cart_list.splice(index, 1);
+                        this.updateCart();
+                        this.clear();
+                        Swal.fire('Deleted!', 'Product has been removed.', 'success');
+                    }
+                });
+            },
+            updateCart() {
+                localStorage.setItem("cart_list", JSON.stringify(this.cart_list));
+            }
+        }
+    }).mount('#app');
+</script>
+{% endblock %}
